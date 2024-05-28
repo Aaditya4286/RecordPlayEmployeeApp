@@ -143,7 +143,7 @@ const AppText = ({type, weight, style, color, line, ...props}: any) => {
         style['color'] = colors.primaryText;
         break;
       case SECOND:
-        style['color'] = colors.primaryBg;
+        style['color'] = colors.headerColor;
         break;
       case BLACK:
         style['color'] = colors.black;

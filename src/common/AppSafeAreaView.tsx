@@ -17,7 +17,7 @@ const AppSafeAreaView = ({children, style, isSecond}: AppSafeAreaViewProps) => {
         edges={['top']}
         style={{
           flex: 0,
-          backgroundColor: !isSecond ? colors.statusColor : colors.primaryBg,
+          backgroundColor: !isSecond ? colors.headerColor : colors.white,
         }}
       />
       <SafeAreaView
@@ -38,7 +38,7 @@ const AppSafeAreaView = ({children, style, isSecond}: AppSafeAreaViewProps) => {
     <View style={[{flex: 1}, style]}>
       <StatusBar
         translucent={false}
-        backgroundColor={!isSecond ? colors.statusColor : colors.primaryBg}
+        backgroundColor={!isSecond ? colors.headerColor : colors.white}
         barStyle={'light-content'}
       />
       {children}

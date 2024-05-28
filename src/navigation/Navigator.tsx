@@ -9,6 +9,8 @@ import AuthLoading from '../screens/AuthLoading';
 // import EmployeeScreen from '../screens/EmployeeScreen';
 // import RecordScreen from '../screens/MyRecordScreen';
 import MyRecordScreen from '../screens/MyRecordScreen';
+import StartRecordingScreen from '../screens/StartRecordingScreen';
+import SaveRecording from '../screens/SaveRecording';
 
 
 const Stack = createStackNavigator();
@@ -34,7 +36,8 @@ const AuthStack = () => (
 {/* <Stack.Screen name={routes.RECORDING_SCREEN} component={RecordingScreen} /> */}
  {/* <Stack.Screen name={routes.EMPLOYEE_SCREEN} component={EmployeeScreen} /> */}
 <Stack.Screen name={routes.MY_RECORD_SCREEN} component={MyRecordScreen} /> 
-
+<Stack.Screen name={routes.SAVE_RECORDING} component={SaveRecording} /> 
+<Stack.Screen name={routes.START_RECORDING_SCREEN} component={StartRecordingScreen} /> 
   </Stack.Navigator>
 );
 
