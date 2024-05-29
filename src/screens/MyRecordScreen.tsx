@@ -19,11 +19,11 @@ const MyRecordScreen = () => {
           tabBarIndicatorStyle: {
             backgroundColor: colors.indicator,
             width: '30%',
-            marginLeft: '10%', 
+            marginLeft: '10%',
           },
           tabBarLabelStyle: {
             fontSize: 14,
-            fontWeight: '600', 
+            fontWeight: '600',
           },
         }}
       >

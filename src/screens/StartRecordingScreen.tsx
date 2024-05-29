@@ -5,10 +5,8 @@ import { Audio, StartRecord, NotRight, NotCross, YesCross, YesRight, StopRecord 
 import FastImage from 'react-native-fast-image';
 import { colors } from '../theme/colors';
 import NavigationService from '../navigation/NavigationService';
-import { useNavigation } from '@react-navigation/native';
 
 const StartRecordingScreen = () => {
-  const navigation = useNavigation();
 
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -57,8 +55,9 @@ const StartRecordingScreen = () => {
     setIconsVisible(false);
   };
   const handleSavePress = () => {
-    NavigationService.navigate('SAVE_RECORDING', { recordingDuration: timer });
+    NavigationService.navigate('SAVE_RECORDING');
   };
+  //  { recordingDuration: timer } //** also we can send data from one screen to another through params Data through params**/
   return (
     <AppSafeAreaView>
       <Toolbar title="Recording" isBack />

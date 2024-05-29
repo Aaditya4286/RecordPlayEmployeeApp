@@ -1,7 +1,10 @@
-// screens/EmployeeScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Button, Image, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { AppText, BOLD, SIXTEEN, TouchableOpacityView } from '../common';
+import FastImage from 'react-native-fast-image';
+import { Delete2 } from '../helper/ImageAssets';
+import { colors } from '../theme/colors';
 
 const EmployeeScreen = () => {
   const [employees, setEmployees] = useState([]);
@@ -31,8 +34,8 @@ const EmployeeScreen = () => {
     }
   };
 
-  if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (loading) return <AppText>Loading...</AppText>;
+  if (error) return <AppText>Error: {error.message}</AppText>;
 
   return (
     <View style={styles.container}>
@@ -41,15 +44,26 @@ const EmployeeScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.employeeCard}>
-            <Image
-              source={{ uri: item.profile_image || 'https://via.placeholder.com/150' }}
-              style={styles.profileImage}
-            />
             <View style={styles.employeeDetails}>
-              <Text style={styles.name}>{item.employee_name}</Text>
-              <Text>Salary: ${item.employee_salary}</Text>
-              <Text>Age: {item.employee_age}</Text>
-              <Button title="Delete" onPress={() => deleteEmployee(item.id)} />
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name}>Employee ID   <AppText type={SIXTEEN} weight={BOLD} style={styles.name2}>{item.id}</AppText></AppText>
+              <TouchableOpacityView onPress={() => deleteEmployee(item.id)}>
+                <FastImage source={Delete2} resizeMode='contain' style={styles.image2} />
+              </TouchableOpacityView>
+            </View>
+
+            <View style={styles.employeeDetails}>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name}>Employee Name</AppText>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name2}>{item.employee_name}</AppText>
+            </View>
+
+            <View style={styles.employeeDetails}>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name}>Employee Salary</AppText>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name2}>Salary: ${item.employee_salary}</AppText>
+            </View>
+
+            <View style={styles.employeeDetails}>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name}>Employee Age</AppText>
+              <AppText type={SIXTEEN} weight={BOLD} style={styles.name2}>Age: {item.employee_age}</AppText>
             </View>
           </View>
         )}
@@ -65,29 +79,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   employeeCard: {
-    flexDirection: 'row',
-    padding: 10,
+    padding: 16,
     marginVertical: 5,
-    backgroundColor: '#fff',
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DDDDDD'
   },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 10,
+  image2: {
+    height: 32,
+    width: 32,
+  },
+  name2: {
+    color: colors.headerColor
   },
   employeeDetails: {
-    justifyContent: 'center',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
   },
   name: {
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: colors.gray
   },
 });
 
