@@ -6,7 +6,8 @@ import { colors } from '../theme/colors';
 import { tickIcon } from '../helper/ImageAssets';
 import NavigationService from '../navigation/NavigationService';
 
-const SaveRecording = () => {
+const SaveRecording = ({ route }) => {
+  const { recordingPath } = route.params;
   const [recordingTitle, setRecordingTitle] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
 
@@ -17,7 +18,7 @@ const SaveRecording = () => {
       try {
         const existingRecordings = await AsyncStorage.getItem('recordings');
         const recordings = existingRecordings ? JSON.parse(existingRecordings) : [];
-        const newRecording = { title: recordingTitle, color: selectedColor };
+        const newRecording = { title: recordingTitle, color: selectedColor, path: recordingPath };
         const updatedRecordings = [...recordings, newRecording];
         await AsyncStorage.setItem('recordings', JSON.stringify(updatedRecordings));
         NavigationService.navigate('Recording');

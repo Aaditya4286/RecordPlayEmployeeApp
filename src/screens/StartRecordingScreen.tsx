@@ -1,17 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, PermissionsAndroid, Platform, Linking, Alert } from 'react-native';
 import { AppSafeAreaView, AppText, BOLD, FORTY, Toolbar, TouchableOpacityView } from '../common';
 import { Audio, StartRecord, NotRight, NotCross, YesCross, YesRight, StopRecord } from '../helper/ImageAssets';
 import FastImage from 'react-native-fast-image';
 import { colors } from '../theme/colors';
 import NavigationService from '../navigation/NavigationService';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+
+const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const StartRecordingScreen = () => {
-
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState(0);
   const [intervalId, setIntervalId] = useState(null);
   const [iconsVisible, setIconsVisible] = useState(false);
+  const [recordingPath, setRecordingPath] = useState('');
+
+  useEffect(() => {
+    const requestAudioPermissions = async () => {
+      try {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          ]);
+
+          if (
+            granted['android.permission.RECORD_AUDIO'] === PermissionsAndroid.RESULTS.GRANTED &&
+            granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+            granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+          ) {
+            console.log('You can use the audio recording and storage');
+          } else {
+            Alert.alert(
+              'Permissions Denied',
+              'You need to grant audio recording and storage permissions to use this feature. Please enable them in your device settings.',
+              [{ text: 'OK', onPress: () => Linking.openSettings() }]
+            );
+          }
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    };
+
+    requestAudioPermissions();
+  }, []);
+
 
   useEffect(() => {
     if (isRecording) {
@@ -44,20 +80,32 @@ const StartRecordingScreen = () => {
     );
   };
 
-  const handleRecordPress = () => {
-    setIsRecording(prevState => !prevState);
+  const handleRecordPress = async () => {
+    if (isRecording) {
+      const result = await audioRecorderPlayer.stopRecorder();
+      setRecordingPath(result);
+      setIsRecording(false);
+    } else {
+      const path = 'recording.m4a';
+      await audioRecorderPlayer.startRecorder(path);
+      setIsRecording(true);
+    }
   };
 
-
-  const handleStopPress = () => {
+  const handleStopPress = async () => {
+    if (isRecording) {
+      const result = await audioRecorderPlayer.stopRecorder();
+      setRecordingPath(result);
+    }
     setIsRecording(false);
     setTimer(0);
     setIconsVisible(false);
   };
+
   const handleSavePress = () => {
-    NavigationService.navigate('SAVE_RECORDING');
+    NavigationService.navigate('SAVE_RECORDING', { recordingPath });
   };
-  //  { recordingDuration: timer } //** also we can send data from one screen to another through params Data through params**/
+
   return (
     <AppSafeAreaView>
       <Toolbar title="Recording" isBack />
@@ -71,7 +119,7 @@ const StartRecordingScreen = () => {
           <TouchableOpacityView onPress={handleRecordPress}>
             <FastImage source={isRecording ? StopRecord : StartRecord} resizeMode='contain' style={styles.image3} />
           </TouchableOpacityView>
-          <TouchableOpacityView onPress={handleSavePress}>
+          <TouchableOpacityView onPress={handleSavePress} disabled={!iconsVisible}>
             <FastImage source={iconsVisible ? YesRight : NotRight} resizeMode='contain' style={styles.image2} />
           </TouchableOpacityView>
         </View>

@@ -8,6 +8,9 @@ import { Delete, Play, Record, Search } from '../helper/ImageAssets';
 import { colors } from '../theme/colors';
 import { TouchableOpacityView } from '../common';
 import NavigationService from '../navigation/NavigationService';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+
+const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const RecordingScreen = () => {
   const [recordings, setRecordings] = useState([]);
@@ -35,6 +38,15 @@ const RecordingScreen = () => {
     await AsyncStorage.setItem('recordings', JSON.stringify(updatedRecordings));
   };
 
+  const handlePlay = async (path) => {
+    await audioRecorderPlayer.startPlayer(path);
+    audioRecorderPlayer.addPlayBackListener((e) => {
+      if (e.currentPosition === e.duration) {
+        audioRecorderPlayer.stopPlayer();
+      }
+    });
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {recordings.length === 0 ? (
@@ -51,7 +63,7 @@ const RecordingScreen = () => {
           <View key={index} style={[styles.recordingCard, { backgroundColor: recording.color, borderColor: recording.color }]}>
             <AppText type={FOURTEEN} weight={BOLD}>{recording.title}</AppText>
             <View style={styles.rowView}>
-              <TouchableOpacityView>
+              <TouchableOpacityView onPress={() => handlePlay(recording.path)}>
                 <FastImage source={Play} style={styles.image2} />
               </TouchableOpacityView>
               <TouchableOpacityView onPress={() => handleDelete(index)}>
