@@ -38,6 +38,7 @@ const SaveRecording = ({ route }) => {
         <TextInput
           style={styles.textInput}
           placeholder="Recording 1"
+          placeholderTextColor={colors.black}
           value={recordingTitle}
           onChangeText={setRecordingTitle}
         />
