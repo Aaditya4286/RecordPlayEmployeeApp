@@ -2,11 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { AppText, BOLD, FOURTEEN, TWENTY } from '../common';
 import FastImage from 'react-native-fast-image';
-import { Delete, Play, Record, Search } from '../helper/ImageAssets';
+import { Delete, Play, Record, Search, Stopped } from '../helper/ImageAssets';
 import { colors } from '../theme/colors';
-import { TouchableOpacityView } from '../common';
+import { AppText, BOLD, FOURTEEN, TWENTY, TouchableOpacityView } from '../common';
 import NavigationService from '../navigation/NavigationService';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
@@ -14,6 +13,7 @@ const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const RecordingScreen = () => {
   const [recordings, setRecordings] = useState([]);
+  const [playingIndex, setPlayingIndex] = useState(null);
 
   const fetchRecordings = async () => {
     try {
@@ -33,52 +33,87 @@ const RecordingScreen = () => {
   );
 
   const handleDelete = async (index) => {
-    const updatedRecordings = recordings.filter((_, i) => i !== index);
-    setRecordings(updatedRecordings);
-    await AsyncStorage.setItem('recordings', JSON.stringify(updatedRecordings));
+    Alert.alert(
+      "Delete Recording",
+      "Are you sure you want to delete this recording?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            const updatedRecordings = recordings.filter((_, i) => i !== index);
+            setRecordings(updatedRecordings);
+            await AsyncStorage.setItem('recordings', JSON.stringify(updatedRecordings));
+          },
+          style: "destructive"
+        }
+      ],
+      { cancelable: true }
+    );
   };
 
-  const handlePlay = async (path) => {
-    await audioRecorderPlayer.startPlayer(path);
-    audioRecorderPlayer.addPlayBackListener((e) => {
-      if (e.currentPosition === e.duration) {
-        audioRecorderPlayer.stopPlayer();
+  const handlePlayPause = async (index) => {
+    if (playingIndex === index) {
+      await audioRecorderPlayer.stopPlayer();
+      audioRecorderPlayer.removePlayBackListener();
+      setPlayingIndex(null);
+    } else {
+      if (playingIndex !== null) {
+        await audioRecorderPlayer.stopPlayer();
+        audioRecorderPlayer.removePlayBackListener();
       }
-    });
+      await audioRecorderPlayer.startPlayer(recordings[index].path);
+      setPlayingIndex(index);
+      audioRecorderPlayer.addPlayBackListener((e) => {
+        if (e.currentPosition === e.duration) {
+          audioRecorderPlayer.stopPlayer();
+          audioRecorderPlayer.removePlayBackListener();
+          setPlayingIndex(null);
+        }
+      });
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {recordings.length === 0 ? (
-        <View style={styles.noRecordingsContainer}>
-          <FastImage source={Search} resizeMode='contain' style={styles.image} />
-          <AppText type={TWENTY} weight={BOLD} style={styles.textColor}>No Recording Found!!</AppText>
-          <AppText type={FOURTEEN} color={colors.startText} style={styles.text}>There's nothing here yet. Hit the record button to capture something amazing!</AppText>
-          <TouchableOpacityView style={styles.touchable} onPress={() => NavigationService.navigate('START_RECORDING_SCREEN')}>
-            <FastImage source={Record} resizeMode='contain' style={styles.recordImage} />
-          </TouchableOpacityView>
-        </View>
-      ) : (
-        recordings.map((recording, index) => (
-          <View key={index} style={[styles.recordingCard, { backgroundColor: recording.color, borderColor: recording.color }]}>
-            <AppText type={FOURTEEN} weight={BOLD}>{recording.title}</AppText>
-            <View style={styles.rowView}>
-              <TouchableOpacityView onPress={() => handlePlay(recording.path)}>
-                <FastImage source={Play} style={styles.image2} />
-              </TouchableOpacityView>
-              <TouchableOpacityView onPress={() => handleDelete(index)}>
-                <FastImage source={Delete} style={styles.image2} />
-              </TouchableOpacityView>
-            </View>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        {recordings.length === 0 ? (
+          <View style={styles.noRecordingsContainer}>
+            <FastImage source={Search} resizeMode='contain' style={styles.image} />
+            <AppText type={TWENTY} weight={BOLD} style={styles.textColor}>No Recording Found!!</AppText>
+            <AppText type={FOURTEEN} color={colors.startText} style={styles.text}>There's nothing here yet. Hit the record button to capture something amazing!</AppText>
           </View>
-        ))
-      )}
-    </ScrollView>
+        ) : (
+          recordings.map((recording, index) => (
+            <View key={index} style={[styles.recordingCard, { backgroundColor: recording.color, borderColor: recording.color }]}>
+              <AppText type={FOURTEEN} weight={BOLD}>{recording.title}</AppText>
+              <View style={styles.rowView}>
+                <TouchableOpacityView onPress={() => handlePlayPause(index)}>
+                  <FastImage source={playingIndex === index ? Stopped : Play} style={styles.image2} />
+                </TouchableOpacityView>
+                <TouchableOpacityView onPress={() => handleDelete(index)}>
+                  <FastImage source={Delete} style={styles.image2} />
+                </TouchableOpacityView>
+              </View>
+            </View>
+          ))
+        )}
+      </ScrollView>
+      <TouchableOpacityView style={styles.touchable} onPress={() => NavigationService.navigate('START_RECORDING_SCREEN')}>
+        <FastImage source={Record} resizeMode='contain' style={styles.recordImage} />
+      </TouchableOpacityView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollViewContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -115,7 +150,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     borderRadius: 8,
     borderWidth: 1,
-    width: '50%',
+    width: '80%',
   },
   rowView: {
     flexDirection: "row",

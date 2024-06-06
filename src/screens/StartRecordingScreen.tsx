@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, PermissionsAndroid, Platform, Linking, Alert } from 'react-native';
+import { Text, View, StyleSheet, PermissionsAndroid, Platform, Alert, Linking } from 'react-native';
 import { AppSafeAreaView, AppText, BOLD, FORTY, Toolbar, TouchableOpacityView } from '../common';
 import { Audio, StartRecord, NotRight, NotCross, YesCross, YesRight, StopRecord } from '../helper/ImageAssets';
 import FastImage from 'react-native-fast-image';
 import { colors } from '../theme/colors';
 import NavigationService from '../navigation/NavigationService';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-
-const audioRecorderPlayer = new AudioRecorderPlayer();
+import AudioRecord from 'react-native-audio-record';
 
 const StartRecordingScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -25,7 +23,7 @@ const StartRecordingScreen = () => {
             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           ]);
-
+  
           if (
             granted['android.permission.RECORD_AUDIO'] === PermissionsAndroid.RESULTS.GRANTED &&
             granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
@@ -44,10 +42,10 @@ const StartRecordingScreen = () => {
         console.warn(err);
       }
     };
-
+  
     requestAudioPermissions();
   }, []);
-
+  
 
   useEffect(() => {
     if (isRecording) {
@@ -82,20 +80,40 @@ const StartRecordingScreen = () => {
 
   const handleRecordPress = async () => {
     if (isRecording) {
-      const result = await audioRecorderPlayer.stopRecorder();
-      setRecordingPath(result);
-      setIsRecording(false);
+      try {
+        const audioPath = await AudioRecord.stop();
+        console.log('Recording stopped, saved at:', audioPath);
+        setRecordingPath(audioPath);
+        setIsRecording(false);
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+      }
     } else {
-      const path = 'recording.m4a';
-      await audioRecorderPlayer.startRecorder(path);
-      setIsRecording(true);
+      const options = {
+        sampleRate: 16000,
+        channels: 1,
+        bitsPerSample: 16,
+        wavFile: 'recording.wav',
+      };
+      AudioRecord.init(options);
+      try {
+        AudioRecord.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error starting recording:', error);
+      }
     }
   };
 
   const handleStopPress = async () => {
     if (isRecording) {
-      const result = await audioRecorderPlayer.stopRecorder();
-      setRecordingPath(result);
+      try {
+        const audioPath = await AudioRecord.stop();
+        console.log('Recording stopped, saved at:', audioPath);
+        setRecordingPath(audioPath);
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+      }
     }
     setIsRecording(false);
     setTimer(0);

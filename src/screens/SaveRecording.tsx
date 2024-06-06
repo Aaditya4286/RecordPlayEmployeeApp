@@ -19,6 +19,7 @@ const SaveRecording = ({ route }) => {
         const existingRecordings = await AsyncStorage.getItem('recordings');
         const recordings = existingRecordings ? JSON.parse(existingRecordings) : [];
         const newRecording = { title: recordingTitle, color: selectedColor, path: recordingPath };
+        console.log('Saving recording:', newRecording);
         const updatedRecordings = [...recordings, newRecording];
         await AsyncStorage.setItem('recordings', JSON.stringify(updatedRecordings));
         NavigationService.navigate('Recording');

@@ -15,4 +15,5 @@ export const Play = require('../../assets/img/play.png');
 export const Stop = require('../../assets/img/stop.png');
 export const Delete = require('../../assets/img/delete.png');
 export const Delete2 = require('../../assets/img/delete2.png');
+export const Stopped = require('../../assets/img/stopped.png');
 
